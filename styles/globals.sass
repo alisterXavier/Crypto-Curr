@@ -1,0 +1,5 @@
+$width-location: 0px
+@for $var from 1 through 8
+    .timeperiod li.selected:nth-child(#{$var}) ~ .slider
+        translate: $width-location
+    $width-location: $width-location + 50px    
