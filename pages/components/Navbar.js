@@ -185,7 +185,7 @@ function Navbar() {
                               </p>
                               <p
                                 className={`${
-                                  c.change < 0 ? "text-green-500" : "text-red-500"
+                                  c.change > 0 ? "text-green-500" : "text-red-500"
                                 }`}
                               >
                                 {c.change}
@@ -335,7 +335,7 @@ function Navbar() {
                                     <p className="text-xl">{parseFloat(c.price).toFixed(2)}</p>
                                     <p
                                       className={`${
-                                        c.change < 0
+                                        c.change > 0
                                           ? "text-green-500"
                                           : "text-red-500"
                                       }`}
