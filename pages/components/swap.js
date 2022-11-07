@@ -2,7 +2,7 @@ import { FiSettings } from "react-icons/fi";
 import { TfiAngleDown } from "react-icons/tfi";
 import { HiOutlineXMark } from "react-icons//hi2";
 import { AiOutlineSearch } from "react-icons/ai";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { coinsProvider } from "../_app";
 import Image from "next/image";
 import axios from "axios";
@@ -21,19 +21,7 @@ const Swap = () => {
   const fromRef = useRef();
   const toRef = useRef();
 
-  const convertion = async (e) => {
-    var to, from;
-    var id = e.currentTarget.getAttribute("data-input");
-    if (id === "from") {
-      from = fromCoin.symbol;
-      to = toCoin.symbol;
-    } else {
-      from = toCoin.symbol;
-      to = fromCoin.symbol;
-    }
-    console.log(from, to, id);
-
-    setIsConverting(true);
+  const convertApi = (from = fromCoin.symbol, to = toCoin.symbol, id) => {
     if (convertTimeout) clearTimeout(convertTimeout);
     convertTimeout = setTimeout(async () => {
       await axios
@@ -53,6 +41,23 @@ const Swap = () => {
         });
     }, 1500);
   };
+
+  const convertion = async (e) => {
+    var to, from;
+    var id = e.currentTarget.getAttribute("data-input");
+    if (fromCoin && toCoin) {
+      if (id === "from") {
+        from = fromCoin.symbol;
+        to = toCoin.symbol;
+      } else {
+        from = toCoin.symbol;
+        to = fromCoin.symbol;
+      }
+      setIsConverting(true);
+      convertApi(from, to, id);
+    }
+  };
+
   const handleClick = (e) => {
     currChange.current = e.currentTarget.getAttribute("data-coin");
     toggleCoinSelection();
@@ -61,7 +66,6 @@ const Swap = () => {
   const handelSwap = () => {
     const value = !swap;
     setSwap(value);
-    // convertion();
   };
 
   const toggleCoinSelection = (e) => {
@@ -69,7 +73,9 @@ const Swap = () => {
   };
 
   const changeCoin = (e) => {
-    const value = coins.filter(c => c.uuid === e.currentTarget.getAttribute("data-selected"));
+    const value = coins.filter(
+      (c) => c.uuid === e.currentTarget.getAttribute("data-selected")
+    );
     const set = {
       to: () => {
         setToCoin(value[0]);
@@ -78,11 +84,21 @@ const Swap = () => {
         setFromCoin(value[0]);
       },
     };
-    console.log(value)
     set[currChange.current]();
     toggleCoinSelection();
   };
 
+  useEffect(() => {
+    if (
+      fromCoin &&
+      toCoin &&
+      (fromRef.current.value > 0 || toRef.current.value > 0)
+    ) {
+      if (swap) convertApi(toCoin.symbol, fromCoin.symbol, "to");
+      else convertApi(undefined, undefined, "from");
+    }
+  }, [fromCoin, toCoin]);
+  
   return (
     <div className="container flex justify-center items-center p-5">
       <div className="bg-black swap-wrapper p-2 flex flex-col ">
@@ -98,7 +114,9 @@ const Swap = () => {
           <label className="convert-input relative mx-3 my-1 flex pl-5">
             <input
               type="text"
-              className="bg-transparent text-3xl font-semibold"
+              className={`bg-transparent text-3xl font-semibold ${
+                selectCoin && "disable-user"
+              }`}
               data-input="from"
               placeholder="0"
               ref={fromRef}
@@ -126,7 +144,9 @@ const Swap = () => {
           <label className="convert-input relative mx-3 flex pl-5">
             <input
               type="text"
-              className="bg-transparent text-3xl font-semibold"
+              className={`bg-transparent text-3xl font-semibold ${
+                selectCoin && "disable-user"
+              }`}
               placeholder="0"
               ref={toRef}
               data-input="to"
