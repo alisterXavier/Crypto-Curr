@@ -1,22 +1,60 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { BsThreeDots } from "react-icons/bs";
 import { TfiAngleDown } from "react-icons/tfi";
 import { TfiAngleLeft } from "react-icons/tfi";
 import { coinDetails, coinsProvider } from "../_app";
+import axios from 'axios'
 
+var searchTimeout = 0;
 function Navbar() {
   const selection = useRef();
   const placeholder = useRef();
   const [coins, setCoins] = useContext(coinsProvider);
+  const [coinsList, setCoinsList] = useState();
   const [viewCoin, setViewCoin] = useContext(coinDetails);
   const [search, setSearch] = useState(false);
+  const [searchRes, setSearchRes] = useState();
   const router = useRouter();
 
   const handleSearch = () => {
     setSearch(!search);
+  };
+
+  const searchApi = (value) => {
+    const options = {
+      method: "GET",
+      url: "https://coinranking1.p.rapidapi.com/search-suggestions",
+      params: { referenceCurrencyUuid: "yhjMzLPhuIDl", query: value },
+      headers: {
+        "X-RapidAPI-Key": "b34fac19dbmshb7bbf2f06859223p1a2ed9jsn1c8a3226d741",
+        "X-RapidAPI-Host": "coinranking1.p.rapidapi.com",
+      },
+    };
+
+    axios
+      .request(options)
+      .then(function (response) {
+        const filtered = response.data.data.coins.filter((sr) =>
+          coins.map((c) => c.uuid).includes(sr.uuid)
+        );
+        setSearchRes(filtered);
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
+  };
+
+  const handleSearchChange = (e) => {
+    const { value } = e.target;
+    if (value.length > 0) {
+      if (searchTimeout) clearTimeout(searchTimeout);
+      setTimeout(() => {
+        searchApi(value);
+      }, 1000);
+    } else setSearchRes();
   };
 
   const handleClick = (e) => {
@@ -32,6 +70,12 @@ function Navbar() {
       placeholder.current.querySelector("p").style.opacity = "0";
     else placeholder.current.querySelector("p").style.opacity = "1";
   };
+
+  useEffect(() => {
+    if (searchRes) {
+      setCoinsList(searchRes);
+    } else setCoinsList(coins);
+  }, [searchRes, coins]);
 
   return (
     <nav className="flex z-10 top-0 sticky">
@@ -78,10 +122,10 @@ function Navbar() {
             className="flex items-center font-semibold"
             id="pool"
             onClick={(e) => {
-              e.target.classList.add("text-red-500")
+              e.target.classList.add("text-red-500");
               setTimeout(() => {
-                e.target.classList.remove("text-red-500")
-              }, 2000)
+                e.target.classList.remove("text-red-500");
+              }, 2000);
             }}
           >
             <a>Pool</a>
@@ -149,14 +193,14 @@ function Navbar() {
                     type="text"
                     className="bg-transparent ml-1"
                     placeholder="Search"
+                    onChange={handleSearchChange}
                   />
                 </label>
                 <div className="my-2 h-5/6">
                   <h1 className="px-3">Popular Tokens</h1>
                   <ul className="coins-list h-full">
-                    {coins
+                    {coinsList
                       ?.sort((a, b) => a.rank - b.rank)
-                      .slice(0, 9)
                       .map((c, index) => {
                         return (
                           <li
@@ -165,7 +209,7 @@ function Navbar() {
                             key={index}
                             onClick={() => {
                               setViewCoin(c.uuid);
-                              setSearch(false)
+                              setSearch(false);
                             }}
                           >
                             <div className="flex items-center">
@@ -185,7 +229,9 @@ function Navbar() {
                               </p>
                               <p
                                 className={`${
-                                  c.change > 0 ? "text-green-500" : "text-red-500"
+                                  c.change > 0
+                                    ? "text-green-500"
+                                    : "text-red-500"
                                 }`}
                               >
                                 {c.change}
@@ -297,14 +343,14 @@ function Navbar() {
                           type="text"
                           className="bg-transparent ml-1"
                           placeholder="Search"
+                          onChange={handleSearchChange}
                         />
                       </label>
                       <div className="my-2 h-5/6">
                         <h1 className="px-3">Popular Tokens</h1>
                         <ul className="coins-list h-full">
-                          {coins
+                          {coinsList
                             ?.sort((a, b) => a.rank - b.rank)
-                            .slice(0, 9)
                             .map((c, index) => {
                               return (
                                 <li
@@ -313,7 +359,7 @@ function Navbar() {
                                   key={index}
                                   onClick={() => {
                                     setViewCoin(c.uuid);
-                                    setSearch(false)
+                                    setSearch(false);
                                   }}
                                 >
                                   <div className="flex items-center">
@@ -332,7 +378,9 @@ function Navbar() {
                                     </div>
                                   </div>
                                   <div className="font-semibold text-end">
-                                    <p className="text-xl">{parseFloat(c.price).toFixed(2)}</p>
+                                    <p className="text-xl">
+                                      {parseFloat(c.price).toFixed(2)}
+                                    </p>
                                     <p
                                       className={`${
                                         c.change > 0
