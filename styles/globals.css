@@ -45,8 +45,8 @@ nav:before{
   right: 0%;
   filter: blur(20px);
 }
-nav .first-child{
-  width: 25%;
+nav #first-child{
+  width: 30%;
 }
 nav li {
   color: #7a7f98;
@@ -379,7 +379,7 @@ h3{
   nav .search-container-101{
     width: 100%;
   }
-  nav ul#first-child {
+  nav #first-child {
     position: fixed;
     background-color: #0e111a;
     left: 0%;
