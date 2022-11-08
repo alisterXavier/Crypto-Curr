@@ -2,7 +2,7 @@ import Chart from "chart.js/auto";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
-const LineChart = ({ timePeriod, uuid }) => {
+const LineChart = ({ timePeriod, uuid, priceChange }) => {
   const myChart = useRef();
   const [history, setHistory] = useState();
   const Months = [
@@ -34,9 +34,12 @@ const LineChart = ({ timePeriod, uuid }) => {
     axios
       .request(options)
       .then(function (response) {
-        setHistory(
-          response.data.data.history.sort((a, b) => a.timestamp - b.timestamp)
-        );
+        setHistory({
+          ...response.data.data,
+          history: response.data.data.history.sort(
+            (a, b) => a.timestamp - b.timestamp
+          ),
+        });
       })
       .catch(function (error) {
         console.error(error);
@@ -47,7 +50,7 @@ const LineChart = ({ timePeriod, uuid }) => {
     if (history) {
       if (!myChart.current) {
         const data = {
-          labels: history.map((d) => {
+          labels: history.history.map((d) => {
             const time = new Date(d.timestamp * 1000);
             return time.getHours() < 10
               ? "0" + time.getHours()
@@ -55,8 +58,8 @@ const LineChart = ({ timePeriod, uuid }) => {
           }),
           datasets: [
             {
-              label: "Weekly Sales",
-              data: history.map((d) => d.price),
+              label: "Price",
+              data: history.history.map((d) => d.price),
               pointRadius: 0,
               backgroundColor: [
                 "rgba(255, 26, 104, 0.2)",
@@ -82,6 +85,14 @@ const LineChart = ({ timePeriod, uuid }) => {
               legend: {
                 display: false,
               },
+              tooltip: {
+                callbacks: {
+                  label: function (chart) {
+                    priceChange(chart.raw);
+                  },
+                },
+                yAlign: {},
+              },
             },
             interaction: {
               intersect: false,
@@ -94,22 +105,40 @@ const LineChart = ({ timePeriod, uuid }) => {
               },
             },
           },
+          plugins: [
+            {
+              id: "myEventCatcher",
+              beforeEvent(chart, args, pluginOptions) {
+                const event = args.event;
+                if (event.type === "mouseout") {
+                  priceChange();
+                }
+              },
+            },
+          ],
         };
         myChart.current = new Chart(document.getElementById("myChart"), config);
       } else {
-        myChart.current.data.labels = history.map((d) => {
+        myChart.current.data.labels = history.history.map((d) => {
           const time = new Date(d.timestamp * 1000);
           return ["3h", "24h"].includes(timePeriod)
             ? `${
                 time.getHours() < 10 ? "0" + time.getHours() : time.getHours()
-              }:${time.getMinutes()}`
+              }:${
+                time.getMinutes() < 10
+                  ? `0${time.getMinutes()}`
+                  : time.getMinutes()
+              }`
             : ["7d", "30d", "3m"].includes(timePeriod)
             ? `${
-                Months[time.getMonth()]
-              } ${time.getDate()} ${time.getFullYear()}`
-            : ["1y", "3y", "5y"].includes(timePeriod) && time.getFullYear();
+                time.getDate() < 10 ? `0${time.getDate()}` : time.getDate()
+              }  ${Months[time.getMonth()]} ${time.getFullYear()}`
+            : ["1y"].includes(timePeriod) &&
+              `${Months[time.getMonth()]} ${time.getFullYear()}`;
         });
-        myChart.current.data.datasets[0].data = history.map((d) => d.price);
+        myChart.current.data.datasets[0].data = history.history.map(
+          (d) => d.price
+        );
         myChart.current.update();
       }
     }

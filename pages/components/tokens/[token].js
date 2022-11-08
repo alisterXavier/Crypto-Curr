@@ -9,8 +9,10 @@ import parse from "html-react-parser";
 const SelectedToken = () => {
   const [viewCoin, setViewCoin] = useContext(coinDetails);
   const [coin, setCoin] = useState();
-  const filter = ["3h", "24h", "7d", "30d", "3m", "1y"];
-  const [timePeriod, setTimePeriod] = useState("3h")
+  const period = ["3h", "24h", "7d", "30d", "3m", "1y"];
+  const [timePeriod, setTimePeriod] = useState("3h");
+  const [changedCoin, setChangedCoin] = useState();
+
   const getCoin = () => {
     const options = {
       method: "GET",
@@ -42,13 +44,30 @@ const SelectedToken = () => {
       : Math.abs(value).toFixed(2);
   };
 
+  const displayChange = (value) => {};
+
   useEffect(() => {
     getCoin();
   }, [viewCoin]);
 
-  const change = () => {
-    console.log(timePeriod)
-}
+  const priceChange = (price, change) => {
+    setChangedCoin({
+      price: price,
+      change: change,
+    });
+  };
+
+  const displayTag = (value) => (
+    <p className="w-fit flex items-center text-xl">
+      {value}
+      {value > 0 ? (
+        <FiArrowUpRight className="text-green-500" size={15} />
+      ) : (
+        <FiArrowDownRight className="text-red-500" size={15} />
+      )}
+    </p>
+  );
+  
   return (
     coin && (
       <div className="p-5 lg:mb-0 mb-28">
@@ -60,33 +79,41 @@ const SelectedToken = () => {
             <h1 className="mr-2 text-2xl">{coin.name}</h1>
             <h1 className="text-gray-500 text-2xl">{coin.symbol}</h1>
           </div>
-          <h1 className="text-4xl">${formatPrice(coin.price)}</h1>
-          <p className="w-fit flex items-center text-xl">
-            {coin.change}
-            {coin.change > 0 ? (
-              <FiArrowUpRight className="text-green-500" size={15} />
-            ) : (
-              <FiArrowDownRight className="text-red-500" size={15} />
-            )}
-          </p>
+          <h1 className="text-4xl">
+            $
+            {changedCoin?.price
+              ? formatPrice(changedCoin.price)
+              : formatPrice(coin.price)}
+          </h1>
+          {displayTag(coin.change)}
         </div>
         <div>
           <div className="line-wrapper">
-            <LineChart timePeriod={timePeriod} uuid={viewCoin}/>
+            <LineChart
+              timePeriod={timePeriod}
+              uuid={viewCoin}
+              priceChange={(price = undefined, change = undefined) => {
+                priceChange(price, change);
+              }}
+            />
             <ul className="timeperiod relative flex w-fit my-5">
-              {filter.map((f, index) => (
+              {period.map((p, index) => (
                 <li
-                  key={f}
-                  className={`text-center ${index === 0 ? "selected" : ""} px-5 py-2`}
+                  key={p}
+                  className={`text-center ${
+                    index === 0 ? "selected" : ""
+                  } py-2`}
                   onClick={(e) => {
-                    setTimePeriod(f)
-                    change()
+                    setTimePeriod(p);
+                    change();
                     const parent = document.querySelector(".timeperiod");
-                    parent.querySelector(".selected").classList.remove("selected")
+                    parent
+                      .querySelector(".selected")
+                      .classList.remove("selected");
                     e.target.classList.add("selected");
                   }}
                 >
-                  {f}
+                  {p}
                 </li>
               ))}
               <span className="slider"></span>

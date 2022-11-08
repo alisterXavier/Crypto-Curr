@@ -138,7 +138,7 @@ function Navbar() {
             >
               <BsThreeDots size={10} />
             </a>
-            <ul className="absolute top-full right-0 mt-5 w-56 options flex-col justify-evenly items-center">
+            <ul className="absolute mt-5 w-56 options flex-col justify-evenly items-center">
               <li className="text-white font-semibold">
                 <a>Vote in governance</a>
               </li>

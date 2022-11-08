@@ -368,9 +368,6 @@ h3{
   .line-wrapper{
     width: 100%;
   }
-  /* .chart-wrapper .timeperiod{
-
-  } */
 }
 @media only screen and (max-width: 800px) {
   nav{
@@ -401,7 +398,10 @@ h3{
     justify-content: space-between;
   }
   nav .options{
-    left: 50%;
+    top:auto !important;
+    bottom: 100% !important;
+    right:100% !important;
+    left: auto !important;
   }
   nav ul#second-child{
     position: relative;

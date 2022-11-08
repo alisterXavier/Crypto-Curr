@@ -8,6 +8,7 @@ const Tokens = () => {
   const router = useRouter();
   const [coins, setCoins] = useContext(coinsProvider);
   const [viewCoin, setViewCoin] = useContext(coinDetails);
+  
   return (
     <div className="tokens w-full">
       <div className="tokens-wrapper mx-auto">
