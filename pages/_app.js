@@ -40,7 +40,7 @@ function MyApp({ Component, pageProps }) {
       .catch(function (error) {
         console.error(error);
       });
-  }
+  };
 
   useEffect(() => {
     const { pathname } = Router;
