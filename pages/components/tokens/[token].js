@@ -47,7 +47,7 @@ const SelectedToken = () => {
 
   useEffect(() => {
     getCoin();
-  }, [viewCoin]);
+  }, [viewCoin])
 
   const priceChange = (price, change) => {
     setChangedCoin({
