@@ -3,7 +3,7 @@ import "../styles/globals.css";
 import "../styles/globals.sass";
 import Navbar from "./components/Navbar";
 import axios from "axios";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 
 export const coinsProvider = createContext();
 export const coinDetails = createContext();
@@ -41,6 +41,12 @@ function MyApp({ Component, pageProps }) {
         console.error(error);
       });
   };
+  useEffect(() => {
+    const {pathname} = Router
+    if(pathname === '/'){
+      Router.push('components/swap')
+    }
+  })
   useEffect(() => {
     if(viewCoin){
       router.push(`/components/tokens/${viewCoin}`)
