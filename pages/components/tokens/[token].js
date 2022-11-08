@@ -44,7 +44,6 @@ const SelectedToken = () => {
       : Math.abs(value).toFixed(2);
   };
 
-  const displayChange = (value) => {};
 
   useEffect(() => {
     getCoin();
@@ -105,7 +104,6 @@ const SelectedToken = () => {
                   } py-2`}
                   onClick={(e) => {
                     setTimePeriod(p);
-                    change();
                     const parent = document.querySelector(".timeperiod");
                     parent
                       .querySelector(".selected")
