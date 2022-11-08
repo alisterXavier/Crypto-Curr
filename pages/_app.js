@@ -9,7 +9,7 @@ export const coinsProvider = createContext();
 export const coinDetails = createContext();
 
 function MyApp({ Component, pageProps }) {
-  const router = useRouter()
+  const router = useRouter();
   const [coins, setCoins] = useState();
   const [viewCoin, setViewCoin] = useState();
 
@@ -41,21 +41,26 @@ function MyApp({ Component, pageProps }) {
         console.error(error);
       });
   };
-  useEffect(() => {
-    const {pathname} = Router
-    if(pathname === '/'){
-      Router.push('components/swap')
-    }
-  })
-  useEffect(() => {
-    if(viewCoin){
-      router.push(`/components/tokens/${viewCoin}`)
-    }
-  }, [viewCoin])
 
   useEffect(() => {
-    getCoins()
+    const { pathname } = Router;
+    if (pathname === "/") {
+      Router.push("components/swap");
+    }
+  });
+
+  useEffect(() => {
+    const x = null;
+    if (viewCoin) {
+      router.push(`/components/tokens/${viewCoin}`);
+      sessionStorage.setItem("id", viewCoin);
+    } else setViewCoin(sessionStorage.getItem("id"));
+  }, [viewCoin]);
+
+  useEffect(() => {
+    getCoins();
   }, []);
+
   return (
     <coinsProvider.Provider value={[coins, setCoins]}>
       <coinDetails.Provider value={[viewCoin, setViewCoin]}>
